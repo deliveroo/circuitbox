@@ -21,7 +21,7 @@ class CircuitBreakerTest < Minitest::Test
   class Ratio < Minitest::Test
     def setup
       Circuitbox::CircuitBreaker.reset
-      @circuit = Circuitbox::CircuitBreaker.new(:yammer, 
+      @circuit = Circuitbox::CircuitBreaker.new(:yammer,
                                                 sleep_window: 300,
                                                 volume_threshold: 5,
                                                 error_threshold: 33,
@@ -135,7 +135,7 @@ class CircuitBreakerTest < Minitest::Test
 
     def setup
       Circuitbox::CircuitBreaker.reset
-      @circuit = Circuitbox::CircuitBreaker.new(:yammer, cache: ExpiringCache.new('circuits:yammer:asleep', true))
+      @circuit = Circuitbox::CircuitBreaker.new(:yammer, cache: ExpiringCache.new('circuits:yammer::asleep', true))
     end
 
     def test_key_expiration_closes_circuit
@@ -147,7 +147,7 @@ class CircuitBreakerTest < Minitest::Test
 
   class Exceptions < Minitest::Test
     class SentinalError < StandardError; end
-    
+
     def setup
       Circuitbox::CircuitBreaker.reset
       @circuit = Circuitbox::CircuitBreaker.new(:yammer, exceptions: [SentinalError])
@@ -388,7 +388,7 @@ class CircuitBreakerTest < Minitest::Test
 
     def test_notification_on_close
       notifier = gimme_notifier
-      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)      
+      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)
       5.times { circuit.run { raise Timeout::Error }}
       notifier.clear_notified!
       10.times { circuit.run { 'success' }}
@@ -415,7 +415,7 @@ class CircuitBreakerTest < Minitest::Test
 
     def test_notifies_on_success_rate_calculation
       notifier = gimme_notifier(metric: :error_rate, metric_value: 0.0)
-      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)      
+      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)
       10.times { circuit.run { "success" } }
       assert notifier.notified?, "no notification sent"
     end
@@ -429,7 +429,7 @@ class CircuitBreakerTest < Minitest::Test
 
     def test_success_count_on_error_rate_calculation
       notifier = gimme_notifier(metric: :success_count, metric_value: 6)
-      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)      
+      circuit = Circuitbox::CircuitBreaker.new(:yammer, notifier_class: notifier)
       10.times { circuit.run { 'success' }}
       assert notifier.notified?, 'no notification sent'
     end
